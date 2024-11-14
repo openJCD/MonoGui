@@ -40,6 +40,7 @@ function create_standard_options_dialog(scrt, tag)
         end
     end
     d:EnableCloseButton(10)
+    send_debug_message("created standard options dialog")
     return d;
 end
 

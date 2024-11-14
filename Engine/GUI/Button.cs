@@ -27,7 +27,7 @@ namespace MonoGui.Engine.GUI
             event_type = etype;
             anchor = new AnchorCoord(x, y, anchorType, parent, width, height);
             BoundingRectangle = new Rectangle((int)anchor.AbsolutePosition.X, (int)anchor.AbsolutePosition.Y, width, height);
-            Parent.TransferWidget(this);
+            Parent.Add(this);
         }
         public Button(Container parent, string text, int x, int y, AnchorType anchorType, EventType etype, string tag) : base(parent)
         {
@@ -41,7 +41,7 @@ namespace MonoGui.Engine.GUI
             event_type = etype;
             anchor = new AnchorCoord(x, y, anchorType, parent, Width, Height);
             BoundingRectangle = new Rectangle((int)anchor.AbsolutePosition.X, (int)anchor.AbsolutePosition.Y, (int)Width, (int)Height);
-            Parent.TransferWidget(this);
+            Parent.Add(this);
         }
         public override void Draw(SpriteBatch guiSpriteBatch)
         {
@@ -74,12 +74,11 @@ namespace MonoGui.Engine.GUI
                 fillMultiplier = 0.15f;
             }
         }
-        public override void ReceiveClick(Vector2 mousePos, ClickMode cmode, bool isContextDesigner)
+        public override void Click(Vector2 mousePosition, ClickMode clickMode, MouseButton buttonType)
         {
             if (!Enabled) return;
-            base.ReceiveClick(mousePos, cmode, isContextDesigner);
-            if (isContextDesigner) return;
-            if (cmode == ClickMode.Up)
+            base.Click(mousePosition, clickMode, buttonType);
+            if (clickMode == ClickMode.Up)
             {
                 UIEventHandler.onButtonClick(this, new OnButtonClickEventArgs { event_type = event_type, tag = Tag });
             }

@@ -18,13 +18,11 @@ function Init()
     send_debug_message("done.")
 
     send_debug_message("creating gui...")
-    container_taskbar = container(scene_root, 0, 0, scene_root.Width-1, 30, anchor.top_left)
-    container_taskbar.RenderBackgroundColor = false;
-    
+    container_taskbar = container(scene_root, 0, 0, 10, 30, anchor.top_left):BackgroundColor(rgba(10,10,10,75))
+    send_debug_message(container_taskbar:ToString())
     btn_apps = new_plain_button(container_taskbar, "//Apps", -55, 0, 100, 25, "CENTRE", "OpenWindow", "dialog_apps")
     dialog_apps = container(scene_root, 0, 0, 300, 350, "BOTTOMLEFT")
     dialog_apps:Close()
-    dialog_apps.RenderBackgroundColor = true;   
     btn_app_load_benchmark = new_icon_button(dialog_apps, tx_btn_benchmark, 10, 10, anchor.top_left, btnEvent.none, "btn_benchmark") 
     btn_app_terminal = new_icon_button(dialog_apps, tx_btn_terminal, 84, 10, anchor.top_left, btnEvent.none, "terminal")
     --container_bl = new_root_container(scene_root, 0,0, 300, 50, "BOTTOMLEFT");
@@ -32,6 +30,7 @@ function Init()
 
     btn_options = new_plain_button(container_taskbar, "//Options", 55, 0, 100, 25, anchor.center, btnEvent.open_target, "dialog_options")
     dialog_options = create_standard_options_dialog(scene_root,  "dialog_options") 
+    tween_size(container_taskbar, scene_root.Width-1, 30, 0.25);
     send_debug_message("done.")
 end 
 

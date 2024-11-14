@@ -2,8 +2,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using NLua;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MonoGui.Engine.GUI
@@ -14,14 +14,14 @@ namespace MonoGui.Engine.GUI
         protected AnchorCoord anchor;
         protected Rectangle bounding_rectangle;
         protected bool isUnderMouseFocus;
-        protected IContainer _parent;
+        protected Control _parent;
         protected Action<Rectangle> _clickCallback;
 
         public bool DrawDebugRect { get; set; } = false;
 
         public bool Enabled { get; set; } = true;
 
-        public IContainer Parent { get => _parent; protected set => _parent = value; }
+        public Control Parent { get => _parent; protected set => _parent = value; }
 
         public Vector2 AbsolutePosition { get => anchor.AbsolutePosition; }
 
@@ -49,7 +49,13 @@ namespace MonoGui.Engine.GUI
 
         public AnchorType anchorType { get => anchor.Type; set => anchor.Type = value; }
         public LocalThemeProperties Theme = new LocalThemeProperties();
+        private readonly List<Control> _children = new List<Control>();
         public float Alpha { get; set; } = 255f;
+        public UIRoot FindRoot()
+        {
+            return Parent.FindRoot();
+        }
+
         protected Widget(Container parent)
         {
             Parent = parent;
@@ -59,12 +65,11 @@ namespace MonoGui.Engine.GUI
 
         ~Widget()
         {
-            Parent.ChildWidgets.Remove(this);
-            Parent.ChildWidgets = Parent.ChildWidgets.ToList();
+            Dispose();
         }
         public virtual void Dispose() { }
 
-        public Widget(IContainer parent, int width, int height, int relativex = 10, int relativey = 10, AnchorType anchorType = AnchorType.TOPLEFT, string debugLabel = "widget")
+        public Widget(Control parent, int width, int height, int relativex = 10, int relativey = 10, AnchorType anchorType = AnchorType.TOPLEFT, string debugLabel = "widget")
         {
             LocalX = relativex;
             LocalY = relativey;
@@ -74,8 +79,21 @@ namespace MonoGui.Engine.GUI
             localOrigin = new Vector2(width / 2, height / 2);
             Anchor = new AnchorCoord(LocalX, LocalY, anchorType, parent, width, height);
             BoundingRectangle = new Rectangle((int)Anchor.AbsolutePosition.X, (int)Anchor.AbsolutePosition.Y, width, height);
-            parent.TransferWidget(this);
+            parent.Add(this);
             UpdatePos();
+        }
+
+        public List<Control> Children => _children;
+
+        public Control Add(Control c)
+        {
+            _children.Add(c);
+            return this;
+        }
+
+        public void Remove(Control c)
+        {
+            _children.ToList().Remove(c);
         }
 
         public virtual void Draw(SpriteBatch guiSpriteBatch)
@@ -104,7 +122,7 @@ namespace MonoGui.Engine.GUI
         /// Transfer over to a new parent - best not to use on its own. Called whenever you want to "AddNewWidget" on a container.
         /// </summary>
         /// <param name="newParent"></param>
-        internal void SetParent(IContainer newParent)
+        internal void SetParent(Control newParent)
         {
             Parent = newParent;
         }
@@ -115,13 +133,8 @@ namespace MonoGui.Engine.GUI
             bounding_rectangle = new Rectangle((int)anchor.AbsolutePosition.X, (int)anchor.AbsolutePosition.Y, (int)Width, (int)Height);
         }
 
-        public virtual void ReceiveClick(Vector2 mousePos, ClickMode cmode, bool isContextDesigner)
+        public virtual void Click(Vector2 mousePosition, ClickMode clickMode, MouseButton buttonType)
         {
-            if (isContextDesigner)
-            {
-                DesignerContext.Select(this);
-                return;
-            }
             _clickCallback?.Invoke(BoundingRectangle);
         }
 
@@ -132,7 +145,7 @@ namespace MonoGui.Engine.GUI
         }
         public Widget Tooltip(string content)
         {
-            new Tooltip(Parent.FindRoot(), this, content);
+            new Tooltip(FindRoot(), this, content);
             return this;
         }
     }

@@ -28,7 +28,7 @@ namespace MonoGui.Engine.GUI
         {
             this.texture = texture;
             Parent = parent;
-            parent.TransferWidget(this);
+            parent.Add(this);
             Text = text;
             labelfont = Theme.Font;
             Tag = tag;
@@ -47,7 +47,7 @@ namespace MonoGui.Engine.GUI
         public ImageButton(Container parent, Texture2D texture, int relativex, int relativey, string tag, EventType eventType, AnchorType anchorType = AnchorType.TOPLEFT)
         {
             this.texture = texture;
-            parent.TransferWidget(this);
+            parent.Add(this);
             Parent = parent;
             DebugLabel = "btn_icon";
             labelfont = Theme.Font;

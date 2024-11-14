@@ -61,8 +61,7 @@ namespace MonoGui.Engine.GUI
             Anchor = new AnchorCoord(relx, rely, anchorType, parent, width, Height);
             BoundingRectangle = new Rectangle((int)Anchor.AbsolutePosition.X, (int)Anchor.AbsolutePosition.Y, width, (int)Height);
             container = new Container(parent, relx, rely, width, (int)Height, anchorType, hint);
-            SetParent(container);
-            container.TransferWidget(this);
+            container.Add(this);
             _txt_widget = new TextLabel(container, hint, fnt, padding, padding, AnchorType.TOPLEFT);
             Hint = hint;
 
@@ -71,7 +70,6 @@ namespace MonoGui.Engine.GUI
             Core.Window.TextInput += TextInput_RegsiterTextInput;
             cursor_pos_x = (int)_txt_widget.AbsolutePosition.X;
             container.ClipContents = true;
-            container.RenderBackgroundColor = true;
             container.Height += Padding;
             UIRoot.RegisterTextField(this);
         }
@@ -87,10 +85,10 @@ namespace MonoGui.Engine.GUI
             Core.Window.KeyDown -= TextInput_RegisterKeyPress;
             Core.Window.TextInput -= TextInput_RegsiterTextInput;
         }
-        public override void ReceiveClick(Vector2 mousePos, ClickMode cmode, bool isContextDesigner)
+        public override void Click(Vector2 mousePosition, ClickMode clickMode, MouseButton buttonType)
         {
-            base.ReceiveClick(mousePos, cmode, isContextDesigner);
-            if (cmode == ClickMode.Down)
+            base.Click(mousePosition, clickMode, buttonType);
+            if (clickMode == ClickMode.Down)
             {
                 Active = true;
             }
@@ -161,6 +159,9 @@ namespace MonoGui.Engine.GUI
 
         public void TextInput_RegsiterTextInput(object sender, TextInputEventArgs e)
         {
+            try
+            {
+                
             if (Active)
             {
                 if (e.Key == Keys.Back)
@@ -182,6 +183,10 @@ namespace MonoGui.Engine.GUI
                     AddChar(e.Character.ToString()[0]);
                     _onTypeCallback?.Invoke(BoundingRectangle);
                 }
+            }
+            } catch (Exception exception)
+            {
+                UIEventHandler.sendDebugMessage(this, exception.InnerException.Message);
             }
         }
 

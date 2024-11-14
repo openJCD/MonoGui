@@ -11,11 +11,13 @@ namespace MonoGui.Engine.GUI
 {
     public interface Control
     {
-        // List<Control> Children;
-        // void Add(Control c);
-
-        //void Draw(SpriteBatch sb, MgPrimitiveBatcher batcher);
-        void Update(MouseState oldState, MouseState newState);
+        bool IsUnderMouseFocus { get; }
+        List<Control> Children { get; }
+        public Control Add(Control c);
+        public void Remove(Control c);
+        internal void Click(Vector2 mousePosition, ClickMode clickMode, MouseButton buttonType);
+        internal void Draw(SpriteBatch sb);
+        internal void Update(MouseState oldState, MouseState newState);
         float LocalX { get; set; }
         float LocalY { get; set; }
 
@@ -26,5 +28,7 @@ namespace MonoGui.Engine.GUI
         float YPos { get; }
         AnchorCoord Anchor { get; }
         float Alpha { get; set; }
+        UIRoot FindRoot();
+        void Dispose();
     }
 }

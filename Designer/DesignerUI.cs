@@ -16,12 +16,11 @@ namespace MonoGui.Designer
                 FillParentWidth = true,
                 BlockMouseClick = false
             };
-            _rootElement.SetBorderColor(Color.Yellow);
+            _rootElement.BorderColor(Color.Yellow);
             _btn_opentoolbox = new Button(_rootElement, "Toolbox", 10, 10, AnchorType.TOPLEFT, EventType.OpenWindow, "toolbox");
             _toolbox = new Container(_rootElement, 0, 0, 300, (int)parent.Height, debugLabel: "toolbox")
             {
-                FillParentHeight = true,
-                RenderBackgroundColor = true
+                FillParentHeight = true
             };
             _toolbox.Close();
             parent.BringWindowToTop(_rootElement);

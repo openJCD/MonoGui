@@ -42,7 +42,7 @@ namespace MonoGui.Engine.GUI
             localOrigin = new Vector2(fontwidth / 2, fontheight / 2);
             Anchor = new AnchorCoord(relativex, relativey, anchorType, parent, fontwidth, fontheight);
             BoundingRectangle = new Rectangle((int)anchor.AbsolutePosition.X, (int)anchor.AbsolutePosition.Y, fontwidth, fontheight);
-            parent.TransferWidget(this);
+            parent.Add((Control)this);
             UpdatePos();
         }
 
@@ -59,7 +59,7 @@ namespace MonoGui.Engine.GUI
             localOrigin = new Vector2(fontwidth / 2, fontheight / 2);
             Anchor = new AnchorCoord(relativex, relativey, anchorType, parent, fontwidth, fontheight);
             BoundingRectangle = new Rectangle((int)anchor.AbsolutePosition.X, (int)anchor.AbsolutePosition.Y, fontwidth, fontheight);
-            parent.TransferWidget(this);
+            parent.Add((Control)this);
             UpdatePos();
         }
         [LuaHide]

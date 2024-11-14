@@ -15,8 +15,6 @@ function OnButtonClick(sender, e)
     if sender == btn_create_container then
         local c = container(scene_root, randint(-400, 400), randint(-300, 300), randint(10, 200), randint(10, 200), "CENTRE")
         count = count + 1
-        c.RenderBackgroundColor=true
-        c.DrawBorder=true
         c.ClipContents=true
         window:Open()
         label_container_count.Text = "Count: " .. count

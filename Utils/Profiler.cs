@@ -52,9 +52,9 @@ namespace MonoGui.Utils
             }
         }
 
-        public static Container CreateUI(IContainer parent, int x, int y, AnchorType anchor)
+        public static Container CreateUI(UIRoot parent, int x, int y, AnchorType anchor)
         {
-            Container c = new Container(parent, x, y, 250, 200, anchor, "profiler gui") { RenderBackgroundColor = true };
+            Container c = new Container(parent, x, y, 250, 200, anchor, "profiler gui") { };
             int i = 0;
             output.Clear();
             foreach (string s in active_sw.Keys)

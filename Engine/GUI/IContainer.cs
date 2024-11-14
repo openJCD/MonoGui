@@ -24,7 +24,7 @@ namespace MonoGui.Engine.GUI
 
         public UIRoot FindRoot();
 
-        public void TransferWidget(Widget w);
+        public void Add(Widget w);
 
         public void RemoveChildWidget(Widget w);
     }

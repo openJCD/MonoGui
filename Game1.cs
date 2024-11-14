@@ -43,9 +43,7 @@ namespace MonoGui
             // test for button click events
             UIEventHandler.OnButtonClick += Game1_HandleOnButtonClick;
             
-            SceneManager = Core.Init(UIContentManager, graphicsManager, Window);
-            // check if the Loader throws an exception
-            DesignerContext.Init(SceneManager);
+            SceneManager = Core.InitWithScenes(UIContentManager, graphicsManager, Window);
             base.Initialize();
         }
         private void Game1_HandleOnButtonClick(object sender, OnButtonClickEventArgs e)
@@ -62,6 +60,8 @@ namespace MonoGui
             SpriteBatch = new SpriteBatch(GraphicsDevice);
 
             Core.LoadAll(SceneManager, "Content/GUI/Scenes/", "default.scene");
+            Container c = new Container(SceneManager.activeSceneUIRoot, 10,10,100,100, AnchorType.TOPLEFT);
+            Button b = new Button(c, "hello", 0, 0, AnchorType.CENTRE, EventType.None,"btn_hello");
 
             Background.Import("Content/Backgrounds/crosses.json", Content, out BG);
         }
@@ -81,7 +81,9 @@ namespace MonoGui
 
             Profiler.Begin("Background highlight flare", (float)gameTime.ElapsedGameTime.TotalSeconds);
             if (SceneManager.activeSceneUIRoot.TopmostWindow != null)
-                BG.HighlightRectInLayer(SceneManager.activeSceneUIRoot.TopmostWindow.BoundingRectangle, "base", Theme.TertiaryColor);
+            {
+            }
+
             Profiler.End("Background highlight flare");
             TweenManager.TickAllTweens((float)gameTime.ElapsedGameTime.TotalSeconds);
 

@@ -39,7 +39,7 @@ namespace MonoGui.Engine.GUI
             container.DrawBorder = true;
             Anchor = new AnchorCoord(relativex, relativey, anchorType, parent, Width, Height);
             BoundingRectangle = container.BoundingRectangle;
-            container.TransferWidget(this);
+            container.Add(this);
             container.DrawBorder = false;
         }
 

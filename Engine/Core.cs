@@ -35,7 +35,7 @@ namespace MonoGui.Engine
         static FileSystemWatcher _scenesWatcher = new FileSystemWatcher("Content/GUI/Scenes/");
 
         static string _settingsPath;
-        public static SceneManager Init(ContentManager c, GraphicsDeviceManager g, GameWindow w, string settingsPath = "Content/Saves/settings.ini")
+        public static SceneManager InitWithScenes(ContentManager c, GraphicsDeviceManager g, GameWindow w, string settingsPath = "Content/Saves/settings.ini")
         {
             GraphicsManager = g;
             Window = w;
@@ -49,12 +49,34 @@ namespace MonoGui.Engine
             SetScreenBounds(Theme.DisplayWidth, Theme.DisplayHeight);
             return sm;
         }
+
+        public static UIRoot InitEssential(GraphicsDeviceManager g, GameWindow w, ContentManager c, string settingsPath = "Content/Saves/settings.ini")
+        {
+            GraphicsManager = g;
+            Window = w;
+            Content = c;
+            Window.AllowUserResizing = true;
+            Window.KeyDown += OnKeyDown;
+            Window.ClientSizeChanged += OnResize;
+            Theme.LoadIniFile(settingsPath, Content);
+            SetScreenBounds(Theme.DisplayWidth, Theme.DisplayHeight);
+
+            return new UIRoot();
+        }
+        
+        /// <summary>
+        /// Load everything, including scenes from sceneFolder using the given SceneManager.
+        /// Essentially the MonoGui Core with Scenes enabled.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="sceneFolder"></param>
+        /// <param name="sceneEntryPoint"></param>
         public static void LoadAll(SceneManager s, string sceneFolder, string sceneEntryPoint)
         {
             s.CreateScenesFromFolder(sceneFolder);
             s.LoadScene(sceneEntryPoint);
         }
-
+        
         public static double GetFPS(GameTime gt)
         {
             return (1 / gt.ElapsedGameTime.TotalSeconds);

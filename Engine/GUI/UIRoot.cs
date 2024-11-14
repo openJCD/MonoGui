@@ -1,6 +1,5 @@
 ﻿using MonoGui.Engine.Animations;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using NLua;
@@ -11,13 +10,13 @@ using System.Linq;
 
 namespace MonoGui.Engine.GUI
 {
-    public class UIRoot : IContainer, IDisposable
+    public class UIRoot : IDisposable, Control
     {
         private static MouseState oldmousestate;
         private static MouseState newmousestate;
 
         private static List<TextInput> _textInputSelectLookup = new List<TextInput>();
-        public WindowContainer TopmostWindow => orderedContainers[0] as WindowContainer;
+        public WindowContainer TopmostWindow => _orderedChildren[0] as WindowContainer;
         public bool IsUnderMouseFocus => true;
         public static MouseState MouseState { get => oldmousestate; }
 
@@ -30,18 +29,16 @@ namespace MonoGui.Engine.GUI
         private List<Container> base_containers;
         private GraphicsDeviceManager graphicsInfo;
 
-        [LuaHide]
-        public List<Container> ChildContainers { get => base_containers; set => base_containers = value; }
+        [LuaHide] public List<Container> ChildContainers => _children.Cast<Container>().ToList();
 
 
         // list of containers to use for click propagation / blocking (topmost panel is index 0)
-        [LuaHide]
-        List<Container> orderedContainers
+        List<Control> _orderedChildren
         {
             get
             {
-                List<Container> _oc = new List<Container>();
-                _oc.AddRange(base_containers);
+                List<Control> _oc = new List<Control>();
+                _oc.AddRange(_children);
                 _oc.Reverse();
                 return _oc;
             }
@@ -50,10 +47,13 @@ namespace MonoGui.Engine.GUI
         [LuaHide]
         public List<Widget> ChildWidgets { get; set; }
         public string DebugLabel { get { return "UI Root"; } }
+        public float LocalY { get; set; }
         public float Width { get { return width; } set => width = (int)value; }
         public float Height { get { return height; } set => height = (int)value; }
         public float XPos { get; set; }
         public float YPos { get; set; }
+        public AnchorCoord Anchor { get; }
+
         public int PaddingX
         {
             get { return paddingx; }
@@ -77,18 +77,14 @@ namespace MonoGui.Engine.GUI
         public float Alpha { get; set; } = 255f;
 
         [LuaHide]
-        public List<Container> ContainersUnderMouseHover { get; set; }
-
-        [LuaHide]
         public Container draggedWindow { get; set; }
 
         public Vector2 MouseDelta;
+        private readonly List<Control> _children = new List<Control>();
 
         public UIRoot()
         {
-            ContainersUnderMouseHover = new List<Container>();
-            ChildContainers = new List<Container>();
-            ChildWidgets = new List<Widget>();
+            graphicsInfo = Core.GraphicsManager;
             windowwidth = (int)(Width = Theme.DisplayWidth);
             windowheight = (int)(Height = Theme.DisplayHeight);
         }
@@ -97,8 +93,6 @@ namespace MonoGui.Engine.GUI
             Initialise(graphicsInfo);
             windowwidth = (int)(Width = Theme.DisplayWidth);
             windowheight = (int)(Height = Theme.DisplayHeight);
-            ContainersUnderMouseHover = new List<Container>();
-            ChildContainers = new List<Container>();
         }
         public void Initialise(GraphicsDeviceManager graphicsInfo)
         {
@@ -114,8 +108,7 @@ namespace MonoGui.Engine.GUI
         public void Dispose()
         {
             ChildContainers.ToList().ForEach(c => c.Dispose());
-            ChildContainers = new List<Container>();
-            ContainersUnderMouseHover = new List<Container>();
+            new List<Container>();
             _textInputSelectLookup = new List<TextInput>();
         }
         [LuaHide]
@@ -126,24 +119,25 @@ namespace MonoGui.Engine.GUI
             newkstate = Keyboard.GetState();
             newmousestate = Mouse.GetState();
             MouseDelta = newmousestate.Position.ToVector2() - oldmousestate.Position.ToVector2();
-            foreach (Container container in base_containers.ToList())
+            foreach (var child in _children)
             {
-                container.Update(oldmousestate, newmousestate);
+                child.Update(oldmousestate, newmousestate);
             }
-            ContainersUnderMouseHover = GetHoveredContainers();
+            GetHoveredContainers();
             if (newmousestate.RightButton == ButtonState.Pressed && oldmousestate.RightButton == ButtonState.Released)
             {
-
+                UIEventHandler.onMouseClick(this, new MouseClickArgs { mouse_data = newmousestate });
+                Click(newmousestate.Position.ToVector2(), ClickMode.Down, MouseButton.Right);
             }
             if (newmousestate.LeftButton == ButtonState.Pressed && oldmousestate.LeftButton == ButtonState.Released)
             {
                 UIEventHandler.onMouseClick(this, new MouseClickArgs { mouse_data = newmousestate });
-                SendClick(newmousestate.Position.ToVector2(), ClickMode.Down, false);
+                Click(newmousestate.Position.ToVector2(), ClickMode.Down, MouseButton.Left);
             }
             if (newmousestate.LeftButton == ButtonState.Released && oldmousestate.LeftButton == ButtonState.Pressed)
             {
                 UIEventHandler.onMouseUp(this, new MouseClickArgs { mouse_data = newmousestate });
-                SendClick(newmousestate.Position.ToVector2(), ClickMode.Up, false);
+                Click(newmousestate.Position.ToVector2(), ClickMode.Up, MouseButton.Left);
             }
             if (newkstate.GetPressedKeyCount() == 0 && oldkstate.GetPressedKeyCount() > 0)
             {
@@ -159,16 +153,33 @@ namespace MonoGui.Engine.GUI
             oldmousestate = newmousestate;
             _movedToNext = false;
         }
+
+        public List<Control> Children => _children;
+
+        public Control Add(Control c)
+        {
+            _children.Add(c);
+            return this;
+        }
+
+        public void Remove(Control c)
+        {
+            _children.Remove(c);
+        }
+
         public void Draw(SpriteBatch guiSpriteBatch)
         {
-            foreach (Container container in ChildContainers)
-                container.Draw(guiSpriteBatch);
+            foreach (Control c in _children)
+                c.Draw(guiSpriteBatch);
         }
+
+        public void Update(MouseState oldState, MouseState newState) => Update();
+
+        public float LocalX { get; set; }
 
         public void AddContainer(Container containerToAdd)
         {
             ChildContainers.Add(containerToAdd);
-            containerToAdd.SetNewContainerParent(this);
         }
         [LuaHide]
         public void PrintUITree()
@@ -227,26 +238,22 @@ namespace MonoGui.Engine.GUI
             ChildContainers.ForEach(cont => cont.ResetPosition());
         }
 
-        internal void SendClick(Vector2 mousePos, ClickMode cmode, bool isContextDesigner)
+        public void Click(Vector2 mousePos, ClickMode cmode, MouseButton buttonType)
         {
             // should fetch the topmost contained clicked and skip the other ones
-            foreach (Container c in orderedContainers)
+            foreach (Control c in _orderedChildren)
             {
-                if (c.IsUnderMouseFocus && c.BlockMouseClick)
+                if (c.IsUnderMouseFocus)
                 {
-                    c.SendClick(mousePos, cmode, isContextDesigner);
+                    c.Click(mousePos, cmode, MouseButton.Left);
                     return;
                 }
             }
         }
 
-        public UIRoot FindRoot() { return this; }
-
-        public void TransferWidget(Widget w)
+        public UIRoot FindRoot()
         {
-            ChildWidgets.Add(w);
-            w.Parent.RemoveChildWidget(w);
-            w.SetParent(this);
+            return this;
         }
 
         public void RemoveChildWidget(Widget w)
@@ -281,5 +288,12 @@ namespace MonoGui.Engine.GUI
     {
         Down,
         Up
+    }
+
+    public enum MouseButton
+    {
+        Left, 
+        Middle, 
+        Right
     }
 }

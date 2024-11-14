@@ -70,10 +70,7 @@ namespace MonoGui.Engine.GUI
             sw.Flush();
             sw.Close();
         }
-        public void HighlightRectInLayer(Rectangle rectangle, string layer, Color flairColour)
-        {
-            Layers[layer].SetHighlightRect(rectangle, flairColour);
-        }
+
         public static void Import(string filepath, ContentManager c, out Background bg)
         {
             Stream s = new FileStream(filepath, FileMode.Open);
@@ -147,9 +144,7 @@ namespace MonoGui.Engine.GUI
                         for (int y = 0 - tileHeight; y < screenH + tileHeight; y += tileHeight)
                         {
                             Rectangle tilestep = new Rectangle(new Point(x, y) + Offset.ToPoint(), Sprite.Bounds.Size);
-                            if (highlightRect.Intersects(tilestep))
-                                sb.Draw(Sprite, tilestep, highlightColor);
-                            else sb.Draw(Sprite, tilestep, BlendColor);
+                            sb.Draw(Sprite, tilestep, BlendColor);
                         }
                     }
                     return;
@@ -250,12 +245,6 @@ namespace MonoGui.Engine.GUI
         public void SetOffset(Vector2 o)
         {
             Offset = o;
-        }
-
-        internal void SetHighlightRect(Rectangle r, Color c)
-        {
-            highlightRect = r;
-            highlightColor = c;
         }
 
         internal void JSONOnly_LoadTexture(ContentManager c)

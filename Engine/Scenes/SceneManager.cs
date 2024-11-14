@@ -72,7 +72,7 @@ namespace MonoGui.Scenes
                 dbc.CreateUI(activeSceneUIRoot);
             activeSceneUIRoot.OnWindowResize(Core.Window);
         }
-        public void AddCustomAPI(CustomAPI api)
+        public void AddCustomApi(CustomAPI api)
         {
             if (_customAPIs[31] != null)
                 throw new Exception("Maximum custom APIs added to scenes");
@@ -80,9 +80,9 @@ namespace MonoGui.Scenes
                 throw new Exception("Custom API already added");
             _customAPIs.Append(api);
         }
-        public Scene GetScene(string scene_name)
+        public Scene GetScene(string sceneName)
         {
-            return SceneDictionary[scene_name];
+            return SceneDictionary[sceneName];
         }
         public void AddSceneToList(Scene scene)
         {

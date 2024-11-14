@@ -36,8 +36,6 @@ namespace MonoGui.Engine.GUI
         {
             this.parent = parent;
             UIEventHandler.OnButtonClick += WindowContainer_OnButtonClick;
-            ChildWidgets = new List<Widget>();
-            ChildContainers = new List<Container>();
             DebugLabel = title;
             IsOpen = true;
             Tag = tag;
@@ -50,8 +48,7 @@ namespace MonoGui.Engine.GUI
             headerbar = new Container(this, 0, 0, width, 20, AnchorType.TOPLEFT);
             label = new TextLabel(headerbar, DebugLabel, Engine.Theme.SmallUIFont, 0, 0, AnchorType.CENTRE);
             dragZone = new Rectangle(headerbar.BoundingRectangle.Location, headerbar.BoundingRectangle.Size);
-            parent.AddContainer(this);
-            RenderBackgroundColor = true;
+            parent.Add(this);
         }
         public void WindowContainer_OnButtonClick(object sender, OnButtonClickEventArgs e)
         {
@@ -83,13 +80,13 @@ namespace MonoGui.Engine.GUI
                 headerbar.BoundingRectangle;
             if (_dragging)
             {
-                if (oldState.LeftButton == ButtonState.Pressed)
+                if (newState.LeftButton == ButtonState.Pressed)
                 {
                     parent.BringWindowToTop(this);
                     if (parent.draggedWindow == this)
                     {
-                        anchor.AbsolutePosition += mouseDelta;
                         headerbar.IsSticky = true;
+                        anchor.AbsolutePosition += mouseDelta;
                     }
                 }
                 else _dragging = false;
@@ -107,16 +104,16 @@ namespace MonoGui.Engine.GUI
                     Mouse.SetCursor(MouseCursor.SizeNWSE);
                 if (_resizing)
                 {
-                    Point size = bounding_rectangle.Size;
+                    Point size = _boundingRectangle.Size;
                     Point delta = mouseDelta.ToPoint();
                     headerbar.Width = Width;
 
                     if (oldState.LeftButton == ButtonState.Pressed)
                     {
                         if ((size.X + delta.X < _sizeClampMax.X) && (size.X + delta.X > _sizeClampMin.X))
-                            bounding_rectangle.Width += delta.X;
+                            _boundingRectangle.Width += delta.X;
                         if ((size.Y + delta.Y < _sizeClampMax.Y) && (size.Y + delta.Y > _sizeClampMin.Y))
-                            bounding_rectangle.Height += delta.Y;
+                            _boundingRectangle.Height += delta.Y;
                     }
                     else
                     {
@@ -165,9 +162,9 @@ namespace MonoGui.Engine.GUI
             Resizeable = true;
             return this;
         }
-        public void EnableCloseButton(int pad = 5)
+        public WindowContainer EnableCloseButton(int pad = 5)
         {
-            var c = new Container(headerbar, 0, 0, (int)headerbar.Height, (int)headerbar.Height, AnchorType.TOPRIGHT, "close button aligner") { DrawBorder = false, RenderBackgroundColor = false, FillParentHeight = true };
+            var c = new Container(headerbar, 0, 0, (int)headerbar.Height, (int)headerbar.Height, AnchorType.TOPRIGHT, "close button aligner") { DrawBorder = false, FillParentHeight = true };
             close_button = new CustomDrawButton(c, "", 0, 0, (int)headerbar.Height - pad, (int)headerbar.Height - pad, AnchorType.CENTRE, EventType.CloseWindow, Tag);
             close_button.SetDrawCallback(DrawCloseButton);
             void DrawCloseButton(SpriteBatch sb)
@@ -177,11 +174,12 @@ namespace MonoGui.Engine.GUI
                 var bl = new Vector2(close_button.XPos, close_button.BoundingRectangle.Bottom);
                 var br = new Vector2(close_button.BoundingRectangle.Right, close_button.BoundingRectangle.Bottom);
                 sb.DrawLine(tl, br, close_button.IsUnderMouseFocus ? Color.Red : Color.DarkRed, 1.5f);
-                sb.DrawLine(bl, tr, close_button.IsUnderMouseFocus ? Color.Red : Color.DarkRed);
+                sb.DrawLine(bl, tr, close_button.IsUnderMouseFocus ? Color.Red : Color.DarkRed, 1.5f);
             };
             _isCloseButton = true;
+            return this;
         }
-        internal override void SendClick(Vector2 mousePos, ClickMode cmode, bool isContextDesigner)
+        public override void Click(Vector2 mousePos, ClickMode clickMode, MouseButton buttonType)
         {
             if (dragZone.Contains(mousePos.ToPoint()))
             {
@@ -193,7 +191,7 @@ namespace MonoGui.Engine.GUI
                 _resizing = true;
                 return;
             }
-            base.SendClick(mousePos, cmode, isContextDesigner);
+            base.Click(mousePos, clickMode, buttonType);
         }
     }
 }

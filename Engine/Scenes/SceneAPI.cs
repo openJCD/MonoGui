@@ -37,9 +37,10 @@ namespace MonoGui.Scenes
         #endregion 
 
         #region UI
-        public static Container container(IContainer parent, int x, int y, int width, int height, string anchor)
+        public static Container container(Control parent, int x, int y, int width, int height, string anchor)
         {
-            return new Container(parent, x, y, width, height, LuaHelper.GetEnumFromString<AnchorType>(anchor));
+            Container _c = new Container(parent, x, y, width, height, LuaHelper.GetEnumFromString<AnchorType>(anchor));
+            return _c;
         }
 
         public static WindowContainer window(UIRoot parent, string title, int x, int y, int width, int height, string anchor, string tag)
@@ -85,6 +86,11 @@ namespace MonoGui.Scenes
         public static DrawLayer new_draw_layer(GraphicsDevice g, Camera c)
         {
             return new DrawLayer(g, c);
+        }
+
+        public static Color rgba(float r, float g, float b, float a)
+        {
+            return new Color(r, g, b, a);
         }
         #endregion
 

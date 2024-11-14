@@ -71,7 +71,7 @@ namespace MonoGui.Designer
         static void OnMouseClick(object sender, MouseClickArgs e)
         {
             if (_enabled)
-                _manager.activeSceneUIRoot.SendClick(e.mouse_data.Position.ToVector2(), ClickMode.Down, true);
+                _manager.activeSceneUIRoot.Click(e.mouse_data.Position.ToVector2(), ClickMode.Down, MouseButton.Left);
         }
     }
 }

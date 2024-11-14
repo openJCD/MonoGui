@@ -21,7 +21,6 @@ namespace MonoGui.Engine.GUI
             Content = new TextLabel(this, content, Theme.Font, 0, 0, AnchorType.CENTRE);
             BoundingRectangle = new Rectangle((int)anchor.AbsolutePosition.X, (int)anchor.AbsolutePosition.Y, w, h);
             Close();
-            RenderBackgroundColor = true;
             _parent.BringWindowToTop(this);
         }
 
